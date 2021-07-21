@@ -5,7 +5,9 @@ from urllib.request import urlopen
 # data manipulation
 import pandas
 
-url = "https://www.pro-football-reference.com/years/2020/passing.htm"
+#url = "https://www.pro-football-reference.com/years/2020/passing.htm"
+url = "http://www.espn.com/nfl/schedulegrid/_/year/2010"
+
 
 def get_data(url):
 
@@ -24,7 +26,9 @@ def get_data(url):
     for stat in range(len(rows)):
         stats.append([column.getText() for column in rows[stat].findAll('td')])
 
-    data = pandas.DataFrame(stats, columns=headers[1:])
+    # needs to be stats and headers[1:] for other data
+    data = pandas.DataFrame(stats[1:], columns=stats[0])
 
     return data
 
+print(get_data(url))
