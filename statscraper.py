@@ -63,3 +63,19 @@ def clean_defense_data(data):
     # gets only the teams column and the first 32 rows
     data = data['Tm'].iloc[:32]
     return data
+
+def clean_qb_data(data):
+    data = data[['Player', 'Tm'] + ['QBR', 'Sk']]
+    return data
+
+def clean_rb_data(data):
+    data = data['Player', 'Tm']
+    return data
+
+def clean_wr_te_data(data):
+    data = data['Player', 'Tm']
+    return data
+
+def clean_fantasy_data(data):
+    data = data[['Player', 'Tm'] + ['Age', 'FantPt']]
+    return data
