@@ -5,9 +5,6 @@ from urllib.request import urlopen
 # data manipulation
 import pandas
 
-url = "https://www.pro-football-reference.com/years/2020/passing.htm"
-#url = "http://www.espn.com/nfl/schedulegrid/_/year/2010"
-
 
 # header_row handles cases where there are 2 header rows
 # schedule flag handles schedule urls, which has and empty list at the beginning of stats list for unknown reason
@@ -52,30 +49,39 @@ def change_team_names(data):
                        'New Orleans Saints': 'NO', 'NOR': 'NO', 'New York Giants': 'NYG', 'New York Jets': 'NYJ',
                        'Philadelphia Eagles': 'PHI', 'Pittsburgh Steelers': 'PIT', 'San Francisco 49ers': 'SF',
                        'SFO': 'SF', 'Seattle Seahawks': 'SEA', 'Tampa Bay Buccaneers': 'TB', 'TAM': 'TB',
-                       'Tennessee Titans': 'TEN', 'Washington Football Team': 'WSH'}
+                       'Tennessee Titans': 'TEN', 'Washington Football Team': 'WSH', 'Washington Redskins': 'WSH',
+                       'WAS': 'WSH'}
 
     data = data.replace(team_names_dict)
 
     return data
 
-def clean_defense_data(data):
 
+def clean_defense_data(data):
     # gets only the teams column and the first 32 rows
     data = data['Tm'].iloc[:32]
     return data
 
+
 def clean_qb_data(data):
-    data = data[['Player', 'Tm'] + ['QBR', 'Sk']]
+    data = data[['Player', 'Tm', 'Yds', 'Sk']]
+    data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
     return data
+
 
 def clean_rb_data(data):
     data = data['Player', 'Tm']
+    data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
     return data
+
 
 def clean_wr_te_data(data):
     data = data['Player', 'Tm']
+    data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
     return data
 
+
 def clean_fantasy_data(data):
-    data = data[['Player', 'Tm'] + ['Age', 'FantPt']]
+    data = data[['Player', 'Tm', 'Age', 'G', 'FantPt']]
+    data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
     return data
