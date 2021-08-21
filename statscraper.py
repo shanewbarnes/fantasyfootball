@@ -8,7 +8,7 @@ import pandas
 
 # header_row handles cases where there are 2 header rows
 # schedule flag handles schedule urls, which has and empty list at the beginning of stats list for unknown reason
-def get_data(url, header_row, schedule_flag):
+def get_data(url, header_row=0, schedule_flag=False, flag_2021=False):
 
     html = urlopen(url)
     page = BeautifulSoup(html, features="html.parser")
@@ -26,7 +26,9 @@ def get_data(url, header_row, schedule_flag):
         stats.append([column.getText() for column in rows[stat].findAll('td')])
 
     # needs to be stats[1:] and stats[0] for other data
-    if (schedule_flag):
+    if schedule_flag:
+        if flag_2021:
+            stats[0].append('18')
         data = pandas.DataFrame(stats[1:], columns=stats[0])
     else:
         data = pandas.DataFrame(stats, columns=headers[1:])
@@ -42,7 +44,7 @@ def change_team_names(data):
                        'Cincinnati Bengals': 'CIN', 'Cleveland Browns': 'CLE', 'Dallas Cowboys': 'DAL',
                        'Denver Broncos': 'DEN', 'Detroit Lions': 'DET', 'Green Bay Packers': 'GB', 'GNB': 'GB',
                        'Houston Texans': 'HOU', 'Indianapolis Colts': 'IND', 'Jacksonville Jaguars': 'JAX',
-                       'Kansas City Chiefs': 'KC', 'KAN': 'KC', 'Los Vegas Raiders': 'LV', 'Oakland Raiders': 'LV',
+                       'Kansas City Chiefs': 'KC', 'KAN': 'KC', 'Las Vegas Raiders': 'LV', 'Oakland Raiders': 'LV',
                        'LVR': 'LV', 'OAK': 'LV', 'Los Angeles Rams': 'LAR', 'St. Louis Rams': 'LAR', 'STL': 'LAR',
                        'Los Angeles Chargers': 'LAC', 'San Diego Chargers': 'LAC', 'SDG': 'LAC',
                        'Miami Dolphins': 'MIA', 'Minnesota Vikings': 'MIN', 'New England Patriots': 'NE', 'NWE': 'NE',
@@ -64,24 +66,61 @@ def clean_defense_data(data):
 
 
 def clean_qb_data(data):
-    data = data[['Player', 'Tm', 'Yds', 'Sk']]
+
+    # Avoids data error because there are two columns named Yds
+    columns = data.columns.values
+    columns[-6] = ''
+    data.columns = columns
+
+    data = data[['Player', 'Tm', 'Sk', 'Yds']]
+
+    # removes *, +, and spaces for string comparisons
     data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
+
     return data
 
 
 def clean_rb_data(data):
-    data = data['Player', 'Tm']
+
+    data = data[['Player', 'Tm', 'Pos']]
+
     data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
+
+    qb_indexes = data[(data['Pos'] == 'QB') | (data['Pos'] == 'qb')].index
+    data.drop(qb_indexes, inplace=True)
+
     return data
 
 
-def clean_wr_te_data(data):
-    data = data['Player', 'Tm']
+def clean_wr_data(data):
+
+    data = data[['Player', 'Tm', 'Pos']]
+
+    # removes players who are not receivers
+    rb_te_indexes = data[(data['Pos'] == 'TE') | (data['Pos'] == 'RB') | (data['Pos'] == 'te') | (data['Pos'] == 'rb')].index
+    data.drop(rb_te_indexes, inplace=True)
+
     data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
+
+    return data
+
+
+def clean_te_data(data):
+
+    data = data[['Player', 'Tm', 'Pos']]
+
+    rb_wr_indexes = data[(data['Pos'] == 'WR') | (data['Pos'] == 'RB') | (data['Pos'] == 'wr') | (data['Pos'] == 'rb')].index
+    data.drop(rb_wr_indexes, inplace=True)
+
+    data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
+
     return data
 
 
 def clean_fantasy_data(data):
+
     data = data[['Player', 'Tm', 'Age', 'G', 'FantPt']]
+
     data['Player'] = data['Player'].str.replace('[*,+, ]', '', regex=True)
+
     return data
