@@ -4,6 +4,8 @@ Implementation of Random Forest Regression machine learning model to predict the
 
 ## Technologies
 
+### Python
+
 ### BeautifulSoup
 * Used for scraping data from webpage
 
